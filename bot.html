@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Мой чат-бот</title>
+
+    <style>
+
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #1e1e1e, #353535);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        #chat {
+            width: 500px;
+            height: 700px;
+            margin: 30px auto;
+            background-color: #292929;
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 30px black;
+        }
+
+        #header {
+            background-color: #3b3b3b;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #mode {
+            text-align: center;
+            padding: 8px;
+            background-color: #333;
+            color: #aaa;
+        }
+
+        #messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .message {
+    max-width: 75%;
+    padding: 12px 16px;
+    margin: 10px 0;
+    border-radius: 18px;
+    word-wrap: break-word;
+    animation: messageAppear 0.3s ease;
+}
+
+.user {
+    background-color: #4a7cff;
+    margin-left: auto;
+    text-align: right;
+    border-bottom-right-radius: 5px;
+}
+
+.bot {
+    background-color: #444;
+    margin-right: auto;
+    border-bottom-left-radius: 5px;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+}
+
+.message-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.message-row.user {
+    flex-direction: row-reverse;
+}
+
+.message-row.bot {
+    justify-content: flex-start;
+}
+
+.typing {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    background-color: #aaa;
+    border-radius: 50%;
+    animation: typing 1.2s infinite;
+}
+
+.dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+
+    30% {
+        opacity: 1;
+        transform: translateY(-4px);
+    }
+}
+
+@keyframes messageAppear {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+        #inputArea {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            background-color: #3b3b3b;
+        }
+
+        #message {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        #send {
+            width: 50px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        #buttons {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            background-color: #3b3b3b;
+        }
+
+        #buttons button {
+            flex: 1;
+            padding: 12px 5px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        #searchArea,
+        #musicArea {
+            display: none;
+            padding: 15px;
+            background-color: #333;
+        }
+
+        #searchInput {
+            width: 65%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+        }
+
+        #searchButton {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        #musicArea {
+            text-align: center;
+        }
+
+        #musicArea button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+@media (max-width: 600px) {
+
+    #chat {
+        width: 100%;
+        height: 100vh;
+        margin: 0;
+        border-radius: 0;
+    }
+
+    #header {
+        font-size: 20px;
+        padding: 15px;
+    }
+
+    #messages {
+        padding: 15px;
+    }
+
+    .message {
+        max-width: 90%;
+    }
+
+    #inputArea {
+        padding: 8px;
+    }
+
+    #buttons {
+        padding: 8px;
+        gap: 5px;
+    }
+
+    #buttons button {
+        font-size: 12px;
+        padding: 10px 3px;
+    }
+
+}
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div id="chat">
+
+    <div id="header">
+        🤖 Мой бот
+    </div>
+
+
+    <div id="mode">
+        💬 Чат
+    </div>
+
+
+    <div id="messages">
+
+        <div class="message bot">
+            Привет! 👋 Я твой бот.
+            <br><br>
+            Можешь написать мне «привет» или спросить «как дела».
+        </div>
+
+    </div>
+
+
+    <!-- ПОИСК -->
+
+    <div id="searchArea">
+
+        <input
+            id="searchInput"
+            type="text"
+            placeholder="Что найти?"
+        >
+
+        <button id="searchButton" onclick="doSearch()">
+            🔎 Найти
+        </button>
+
+    </div>
+
+
+    <!-- МУЗЫКА -->
+
+    <div id="musicArea">
+
+        <p>🎵 Музыкальный режим</p>
+
+        <button onclick="openMusic()">
+            🎧 Открыть YouTube Music
+        </button>
+
+    </div>
+
+
+    <!-- ВВОД СООБЩЕНИЯ -->
+
+    <div id="inputArea">
+
+        <input
+            id="message"
+            type="text"
+            placeholder="Напиши сообщение..."
+            onkeydown="checkEnter(event)"
+        >
+
+        <button id="send" onclick="sendMessage()">
+            ➤
+        </button>
+
+    </div>
+
+
+    <!-- КНОПКИ -->
+
+    <div id="buttons">
+
+        <button onclick="searchMode()">
+            🔎 Поиск
+        </button>
+
+        <button onclick="musicMode()">
+            🎵 Музыка
+        </button>
+
+        <button onclick="chatMode()">
+            💬 Чат
+        </button>
+
+        <button onclick="clearChat()">
+            🗑️
+        </button>
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+
+/* =========================
+   ОТПРАВКА СООБЩЕНИЯ
+========================= */
+
+function sendMessage() {
+
+    let input = document.getElementById("message");
+
+    let text = input.value.trim();
+
+    if (text === "") {
+        return;
+    }
+
+    let messages = document.getElementById("messages");
+
+
+    messages.innerHTML += 
+    '<div class="message-row user">' +
+        '<div class="avatar">👤</div>' +
+        '<div class="message user">' +
+            text +
+        '</div>' +
+    '</div>';
+
+
+    input.value = "";
+
+
+    let answer = getAnswer(text);
+
+
+    let typing = document.createElement("div");
+
+typing.className = "message-row bot";
+
+typing.innerHTML =
+    '<div class="avatar">🤖</div>' +
+    '<div class="message bot typing">' +
+        '<span class="dot"></span>' +
+        '<span class="dot"></span>' +
+        '<span class="dot"></span>' +
+    '</div>';
+
+messages.appendChild(typing);
+
+messages.scrollTop = messages.scrollHeight;
+
+
+setTimeout(function() {
+
+    typing.remove();
+
+    messages.innerHTML += 
+        '<div class="message-row bot">' +
+            '<div class="avatar">🤖</div>' +
+            '<div class="message bot">' +
+                answer +
+            '</div>' +
+        '</div>';
+
+    messages.scrollTop =
+        messages.scrollHeight;
+
+        saveChat();
+
+}, 800);
+
+}
+
+
+
+/* =========================
+   ОТВЕТЫ БОТА
+========================= */
+
+function getAnswer(text) {
+
+    text = text.toLowerCase();
+
+
+    if (text.includes("привет")) {
+
+        return "Привет! 😎 Рад тебя видеть!";
+
+    }
+
+
+    if (text.includes("как дела")) {
+
+        return "У меня всё отлично 🤖 А у тебя?";
+
+    }
+
+
+    if (text.includes("кто ты")) {
+
+        return "Я твой маленький чат-бот, которого ты сам создаёшь 😎";
+
+    }
+
+
+    if (text.includes("спасибо")) {
+
+        return "Пожалуйста! ❤️";
+
+    }
+
+
+    if (text.includes("пока")) {
+
+        return "Пока! 👋 Возвращайся ещё.";
+
+    }
+
+
+    return "Я пока не знаю, как ответить на это 🤔";
+
+
+}
+
+
+
+/* =========================
+   КНОПКА ПОИСК
+========================= */
+
+function searchMode() {
+
+    document.getElementById("searchArea").style.display = "block";
+
+    document.getElementById("musicArea").style.display = "none";
+
+    document.getElementById("inputArea").style.display = "none";
+
+    document.getElementById("mode").textContent =
+        "🔎 Поиск";
+
+}
+
+
+
+/* =========================
+   ПОИСК
+========================= */
+
+function doSearch() {
+
+    let query =
+        document.getElementById("searchInput").value.trim();
+
+
+    if (query === "") {
+
+        return;
+
+    }
+
+
+    window.open(
+        "https://www.google.com/search?q=" +
+        encodeURIComponent(query),
+        "_blank"
+    );
+
+}
+
+
+
+/* =========================
+   МУЗЫКА
+========================= */
+
+function musicMode() {
+
+    document.getElementById("searchArea").style.display = "none";
+
+    document.getElementById("musicArea").style.display = "block";
+
+    document.getElementById("inputArea").style.display = "none";
+
+    document.getElementById("mode").textContent =
+        "🎵 Музыка";
+
+}
+
+
+
+/* =========================
+   ОТКРЫТЬ МУЗЫКУ
+========================= */
+
+function openMusic() {
+
+    window.open(
+        "https://music.youtube.com/",
+        "_blank"
+    );
+
+}
+
+
+
+/* =========================
+   ЧАТ
+========================= */
+
+function chatMode() {
+
+    document.getElementById("searchArea").style.display = "none";
+
+    document.getElementById("musicArea").style.display = "none";
+
+    document.getElementById("inputArea").style.display = "flex";
+
+    document.getElementById("mode").textContent =
+        "💬 Чат";
+
+}
+
+
+
+/* =========================
+   ОЧИСТКА ЧАТА
+========================= */
+
+function clearChat() {
+
+    document.getElementById("messages").innerHTML =
+        '<div class="message bot">' +
+        'Чат очищен 🧹 Можем начать заново!' +
+        '</div>';
+         
+      saveChat();
+
+}
+
+
+
+/* =========================
+   ENTER
+========================= */
+function checkEnter(event) {
+
+    if (event.key === "Enter") {
+
+        sendMessage();
+
+    }
+
+}
+
+
+/* =========================
+   СОХРАНЕНИЕ ЧАТА
+========================= */
+
+function saveChat() {
+
+    let messages = document.getElementById("messages").innerHTML;
+
+    localStorage.setItem("chatHistory", messages);
+
+}
+
+
+/* =========================
+   ЗАГРУЗКА ЧАТА
+========================= */
+
+window.onload = function() {
+
+    let savedChat = localStorage.getItem("chatHistory");
+
+    if (savedChat) {
+
+        document.getElementById("messages").innerHTML = savedChat;
+
+    }
+
+};
+
+
+</script>
+
+
+</body>
+</html>
